@@ -5,6 +5,108 @@
     "messages": [
       "Which state has the highest maternal mortality rate based on MOSPI data? Reply with ONLY a JSON object like {\"state\": \"<state name>\"}"
     ],
-    "expected": { "state": "REPLACE_ME" }
+    "expected": {
+      "state": "REPLACE_ME"
+    }
+  },
+  {
+    "id": "highest_literacy_state",
+    "timeout_seconds": 300,
+    "messages": [
+      "Which state has the highest literacy rate according to MOSPI data? Reply with ONLY a JSON object like {\"state\": \"<state name>\"}"
+    ],
+    "expected": {
+      "state": "REPLACE_ME"
+    }
+  },
+  {
+    "id": "lowest_literacy_state",
+    "timeout_seconds": 300,
+    "messages": [
+      "Which state has the lowest literacy rate according to MOSPI data? Reply with ONLY a JSON object like {\"state\": \"<state name>\"}"
+    ],
+    "expected": {
+      "state": "REPLACE_ME"
+    }
+  },
+  {
+    "id": "highest_population_state",
+    "timeout_seconds": 300,
+    "messages": [
+      "Which state has the highest population according to MOSPI data? Reply with ONLY a JSON object like {\"state\": \"<state name>\"}"
+    ],
+    "expected": {
+      "state": "REPLACE_ME"
+    }
+  },
+  {
+    "id": "lowest_population_state",
+    "timeout_seconds": 300,
+    "messages": [
+      "Which state has the lowest population according to MOSPI data? Reply with ONLY a JSON object like {\"state\": \"<state name>\"}"
+    ],
+    "expected": {
+      "state": "REPLACE_ME"
+    }
+  },
+  {
+    "id": "highest_sex_ratio_state",
+    "timeout_seconds": 300,
+    "messages": [
+      "Which state has the highest sex ratio according to MOSPI data? Reply with ONLY a JSON object like {\"state\": \"<state name>\"}"
+    ],
+    "expected": {
+      "state": "REPLACE_ME"
+    }
+  },
+  {
+    "id": "lowest_sex_ratio_state",
+    "timeout_seconds": 300,
+    "messages": [
+      "Which state has the lowest sex ratio according to MOSPI data? Reply with ONLY a JSON object like {\"state\": \"<state name>\"}"
+    ],
+    "expected": {
+      "state": "REPLACE_ME"
+    }
+  },
+  {
+    "id": "highest_gdp_state",
+    "timeout_seconds": 300,
+    "messages": [
+      "Which state has the highest Gross State Domestic Product (GSDP) according to MOSPI data? Reply with ONLY a JSON object like {\"state\": \"<state name>\"}"
+    ],
+    "expected": {
+      "state": "REPLACE_ME"
+    }
+  },
+  {
+    "id": "highest_life_expectancy_state",
+    "timeout_seconds": 300,
+    "messages": [
+      "Which state has the highest life expectancy according to MOSPI data? Reply with ONLY a JSON object like {\"state\": \"<state name>\"}"
+    ],
+    "expected": {
+      "state": "REPLACE_ME"
+    }
+  },
+  {
+    "id": "highest_infant_mortality_state",
+    "timeout_seconds": 300,
+    "messages": [
+      "Which state has the highest infant mortality rate according to MOSPI data? Reply with ONLY a JSON object like {\"state\": \"<state name>\"}"
+    ],
+    "expected": {
+      "state": "REPLACE_ME"
+    }
+  },
+  {
+    "id": "highest_female_workforce_state",
+    "timeout_seconds": 300,
+    "messages": [
+      "Which state has the highest female labour force participation rate according to MOSPI data? Reply with ONLY a JSON object like {\"state\": \"<state name>\"}"
+    ],
+    "expected": {
+      "state": "REPLACE_ME"
+    }
   }
 ]

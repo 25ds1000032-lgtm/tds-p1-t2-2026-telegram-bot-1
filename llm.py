@@ -1,44 +1,48 @@
+from openai import OpenAI
 import os
-import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
-AIPIPE_URL = os.getenv("AIPIPE_URL")
 AIPIPE_TOKEN = os.getenv("AIPIPE_TOKEN")
+
+client = OpenAI(
+    api_key=AIPIPE_TOKEN,
+    base_url="https://aipipe.org/openai/v1",
+)
+
+SYSTEM_PROMPT = """
+You are an expert data analyst.
+
+Solve the user's LAST request.
+
+If the user specifies a JSON format,
+return ONLY that JSON.
+
+Never use markdown.
+
+Never add explanations.
+
+Use previous conversation as context.
+"""
 
 
 def ask_llm(messages):
-    """
-    Send conversation history to AI Pipe
-    and return only the assistant text.
-    """
 
-    if not AIPIPE_URL or not AIPIPE_TOKEN:
-        raise RuntimeError(
-            "Missing AIPIPE_URL or AIPIPE_TOKEN in .env"
+    try:
+
+        response = client.chat.completions.create(
+            model="gpt-5-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": SYSTEM_PROMPT,
+                },
+                *messages,
+            ],
         )
 
-    headers = {
-        "Authorization": f"Bearer {AIPIPE_TOKEN}",
-        "Content-Type": "application/json"
-    }
+        return response.choices[0].message.content.strip()
 
-    payload = {
-        "model": "gpt-4.1-mini",
-        "messages": messages,
-        "temperature": 0.2
-    }
-
-    response = requests.post(
-        AIPIPE_URL,
-        headers=headers,
-        json=payload,
-        timeout=60
-    )
-
-    response.raise_for_status()
-
-    data = response.json()
-
-    return data["choices"][0]["message"]["content"]
+    except Exception as e:
+        return f"LLM Error: {e}"

@@ -2,7 +2,6 @@ import os
 import zipfile
 import requests
 import pandas as pd
-from io import BytesIO
 
 
 DOWNLOAD_DIR = "datasets"
@@ -28,7 +27,7 @@ def download_file(url):
     filename = url.split("/")[-1]
 
     if not filename:
-        filename = "dataset"
+        filename = "dataset.csv"
 
     filepath = os.path.join(
         DOWNLOAD_DIR,
@@ -39,7 +38,9 @@ def download_file(url):
         filepath,
         "wb"
     ) as f:
-        f.write(response.content)
+        f.write(
+            response.content
+        )
 
     return filepath
 
@@ -47,55 +48,66 @@ def download_file(url):
 
 def extract_zip(filepath):
     """
-    Extract ZIP files.
+    Extract zip file.
     """
 
-    extract_path = filepath.replace(
+    extract_dir = filepath.replace(
         ".zip",
         ""
     )
 
     os.makedirs(
-        extract_path,
+        extract_dir,
         exist_ok=True
     )
 
     with zipfile.ZipFile(filepath) as z:
-        z.extractall(extract_path)
 
-    return extract_path
+        z.extractall(
+            extract_dir
+        )
+
+    return extract_dir
 
 
 
 def load_dataset(filepath):
     """
-    Load CSV or Excel dataset.
+    Load CSV or Excel file.
     """
 
     if filepath.endswith(".csv"):
 
-        return pd.read_csv(filepath)
+        return pd.read_csv(
+            filepath
+        )
 
+    elif filepath.endswith(
+        (".xlsx", ".xls")
+    ):
 
-    if filepath.endswith(".xlsx") or filepath.endswith(".xls"):
+        return pd.read_excel(
+            filepath
+        )
 
-        return pd.read_excel(filepath)
+    else:
 
-
-    raise ValueError(
-        "Unsupported file format"
-    )
+        raise ValueError(
+            "Unsupported dataset format"
+        )
 
 
 
 def analyze_dataset(filepath):
     """
-    Generate dataset summary.
+    Generate dataset summary for LLM.
     """
 
     if filepath.endswith(".zip"):
 
-        filepath = extract_zip(filepath)
+        filepath = extract_zip(
+            filepath
+        )
 
         files = []
 
@@ -103,43 +115,97 @@ def analyze_dataset(filepath):
 
             for name in filenames:
 
-                if name.endswith(
-                    (".csv", ".xlsx", ".xls")
+                if name.lower().endswith(
+                    (
+                        ".csv",
+                        ".xlsx",
+                        ".xls"
+                    )
                 ):
+
                     files.append(
-                        os.path.join(root, name)
+                        os.path.join(
+                            root,
+                            name
+                        )
                     )
 
+
         if not files:
+
             raise ValueError(
-                "No dataset file found"
+                "No supported dataset found in ZIP"
             )
+
 
         filepath = files[0]
 
 
-    df = load_dataset(filepath)
+    df = load_dataset(
+        filepath
+    )
+
+
+    numeric_summary = {}
+
+    numeric_df = df.select_dtypes(
+        include="number"
+    )
+
+    if not numeric_df.empty:
+
+        numeric_summary = (
+            numeric_df
+            .describe()
+            .fillna("")
+            .to_dict()
+        )
+
+
+    categorical_summary = {}
+
+    for col in df.select_dtypes(
+        exclude="number"
+    ).columns[:10]:
+
+        categorical_summary[col] = (
+            df[col]
+            .astype(str)
+            .value_counts()
+            .head(10)
+            .to_dict()
+        )
 
 
     summary = {
+
+        "file": filepath,
 
         "rows": len(df),
 
         "columns": list(df.columns),
 
-        "missing_values":
-            df.isnull()
-            .sum()
-            .to_dict(),
-
         "data_types":
-            df.dtypes
-            .astype(str)
-            .to_dict(),
+            df.dtypes.astype(str).to_dict(),
+
+        "missing_values":
+            df.isnull().sum().to_dict(),
+
+        "duplicate_rows":
+            int(df.duplicated().sum()),
+
+        "head":
+            df.head(10)
+            .fillna("")
+            .to_dict(
+                orient="records"
+            ),
 
         "numeric_summary":
-            df.describe()
-            .to_dict()
+            numeric_summary,
+
+        "categorical_summary":
+            categorical_summary
 
     }
 

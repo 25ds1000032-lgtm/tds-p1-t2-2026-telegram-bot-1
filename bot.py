@@ -1,5 +1,6 @@
 import os
 import re
+
 from dotenv import load_dotenv
 
 from telegram import Update
@@ -29,23 +30,6 @@ if not BOT_TOKEN:
     raise ValueError(
         "TELEGRAM_BOT_TOKEN not found in .env"
     )
-
-
-# -------------------------------------------------
-# System Prompt
-# -------------------------------------------------
-
-SYSTEM_PROMPT = """
-You are an expert data analyst.
-
-Answer the user's LAST message.
-
-Use previous conversation only as context.
-
-Give accurate and useful answers.
-
-Do not use markdown unless requested.
-"""
 
 
 # -------------------------------------------------
@@ -79,7 +63,10 @@ async def handle_message(
     user_text = update.message.text
 
 
-    # Save user message
+    # ---------------------------------------------
+    # Store user message
+    # ---------------------------------------------
+
     add_message(
         chat_id,
         "user",
@@ -87,29 +74,26 @@ async def handle_message(
     )
 
 
+    # ---------------------------------------------
     # Get conversation history
+    # ---------------------------------------------
+
     history = get_history(chat_id)
 
 
-    messages = [
-        {
-            "role": "system",
-            "content": SYSTEM_PROMPT,
-        },
-        *history,
-    ]
-
-
-    dataset_url = extract_url(
-        user_text
-    )
+    messages = list(history)
 
 
     try:
 
         # -----------------------------------------
-        # Dataset analysis path
+        # Dataset handling
         # -----------------------------------------
+
+        dataset_url = extract_url(
+            user_text
+        )
+
 
         if dataset_url:
 
@@ -117,29 +101,31 @@ async def handle_message(
                 dataset_url
             )
 
+
             dataset_info = analyze_dataset(
                 file_path
             )
+
 
             messages.append(
                 {
                     "role": "user",
                     "content":
                     f"""
-                    The user provided a dataset.
+The user provided a dataset.
 
-                    Dataset analysis:
+Here is the dataset summary:
 
-                    {dataset_info}
+{dataset_info}
 
-                    Explain the important insights.
-                    """
+Use this information to answer the user's question.
+"""
                 }
             )
 
 
         # -----------------------------------------
-        # AI Pipe response
+        # Ask LLM
         # -----------------------------------------
 
         answer = ask_llm(
@@ -149,11 +135,13 @@ async def handle_message(
 
     except Exception as e:
 
-        answer = f"Error: {str(e)}"
+        answer = f"LLM Error: {str(e)}"
 
 
+    # ---------------------------------------------
+    # Save assistant response in memory
+    # ---------------------------------------------
 
-    # Save assistant message
     add_message(
         chat_id,
         "assistant",
@@ -161,19 +149,30 @@ async def handle_message(
     )
 
 
-    # Log interaction
-    log_run(
-        chat_id,
-        user_text,
-        answer
-    )
+    # ---------------------------------------------
+    # Convert to required JSON format
+    # ---------------------------------------------
 
-
-    # JSON-only output
     final_response = format_response(
         answer
     )
 
+
+    # ---------------------------------------------
+    # Log final response
+    # ---------------------------------------------
+
+    log_run(
+        chat_id,
+        chat_id,
+        user_text,
+        final_response
+    )
+
+
+    # ---------------------------------------------
+    # Send JSON only
+    # ---------------------------------------------
 
     await update.message.reply_text(
         final_response
